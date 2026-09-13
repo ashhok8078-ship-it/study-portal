@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemEng Hub - Chemical Engineering Study Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            900: '#134e4a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200 flex flex-col">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <i class="fa-solid fa-flask text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-brand-600 to-teal-500 bg-clip-text text-transparent">ChemEng Hub</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Chemical Engineering Study Portal</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Stats & Controls -->
+            <div class="flex items-center space-x-3">
+                <span class="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+                    <i class="fa-solid fa-book-bookmark mr-1.5"></i> <span id="notesCount">0</span> Resources
+                </span>
+                
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors focus:outline-none" aria-label="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-brand-50/50 via-slate-50 to-slate-50 dark:from-slate-800/40 dark:via-slate-900 dark:to-slate-900 pt-10 pb-8 px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto text-center space-y-5">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Master Chemical Engineering <br><span class="text-brand-600 dark:text-brand-500">Free Notes & Resources</span>
+            </h2>
+            <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+                Handcrafted lecture notes, formula sheets, lab reports, and previous year question papers categorized for quick access.
+            </p>
+
+            <!-- Search Bar -->
+            <div class="relative max-w-2xl mx-auto pt-2">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 text-slate-400 dark:text-slate-500 text-lg"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        oninput="filterNotes()" 
+                        placeholder="Search notes (e.g. Thermodynamics, Fluid Mechanics, Lab Report)..." 
+                        class="w-full pl-12 pr-10 py-3.5 text-slate-900 dark:text-white bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm sm:text-base transition-all"
+                    >
+                    <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        <!-- Filter Bar -->
+        <div class="space-y-4">
+            <!-- Semester Pills -->
+            <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                    <i class="fa-solid fa-graduation-cap"></i> Semester:
+                </span>
+                <div class="flex items-center space-x-1.5 overflow-x-auto custom-scrollbar pb-1 w-full sm:w-auto text-xs" id="semFilterContainer">
+                    <!-- Dynamic Buttons Generated via JS -->
+                </div>
+            </div>
+
+            <!-- Subject Category Pills -->
+            <div class="flex items-center space-x-2 overflow-x-auto custom-scrollbar pb-2" id="subjectFilterContainer">
+                <!-- Dynamic Buttons Generated via JS -->
+            </div>
+        </div>
+
+        <!-- Notes Cards Grid -->
+        <div id="notesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <!-- Dynamic Note Cards populated by JavaScript -->
+        </div>
+
+        <!-- Empty State UI (If search yields 0 results) -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-2xl">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">No resources found</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Try adjusting your search terms or filters.</p>
+            </div>
+            <button onclick="resetFilters()" class="px-4 py-2 text-xs font-medium text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-900/30 rounded-lg hover:bg-brand-100 transition-colors">
+                Reset All Filters
+            </button>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                &copy; <span id="year"></span> ChemEng Hub. Hosted free on GitHub Pages.
+            </p>
+            <div class="flex items-center justify-center space-x-4 text-slate-400 text-sm">
+                <a href="https://github.com" target="_blank" class="hover:text-brand-500 transition-colors" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="https://drive.google.com" target="_blank" class="hover:text-brand-500 transition-colors" title="Google Drive Storage"><i class="fa-brands fa-google-drive"></i></a>
+                <a href="mailto:student@example.com" class="hover:text-brand-500 transition-colors" title="Contact"><i class="fa-solid fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // -------------------------------------------------------------
+        // NOTES DATA STORE
+        // Replace 'driveUrl' values with your own Google Drive links!
+        // -------------------------------------------------------------
+        const notesData = [
+            {
+                id: 1,
+                title: "Chemical Engineering Thermodynamics I",
+                subject: "Thermodynamics",
+                semester: "3",
+                type: "Complete Notes",
+                format: "PDF",
+                size: "4.2 MB",
+                driveUrl: "https://drive.google.com", // Replace with your Google Drive Link
+                description: "Laws of thermodynamics, PVT behaviors, enthalpy, and entropy calculations.",
+                updated: "Oct 2025"
+            },
+            {
+                id: 2,
+                title: "Fluid Mechanics Unit 1 to 5",
+                subject: "Fluid Mechanics",
+                semester: "3",
+                type: "Handwritten",
+                format: "PDF",
+                size: "8.1 MB",
+                driveUrl: "https://drive.google.com",
+                description: "Fluid statics, Navier-Stokes, boundary layer theory, and dimensional analysis.",
+                updated: "Nov 2025"
+            },
+            {
+                id: 3,
+                title: "Mass Transfer Operations - Distillation",
+                subject: "Mass Transfer",
+                semester: "5",
+                type: "Lecture Notes",
+                format: "PDF",
+                size: "6.5 MB",
+                driveUrl: "https://drive.google.com",
+                description: "McCabe-Thiele method, Ponchon-Savarit, reflux ratio, and column design.",
+                updated: "Dec 2025"
+            },
+            {
+                id: 4,
+                title: "Process Calculations & Stoichiometry",
+                subject: "Process Calculations",
+                semester: "3",
+                type: "Formula Sheet",
+                format: "PDF",
+                size: "2.8 MB",
+                driveUrl: "https://drive.google.com",
+                description: "Material balances with/without reaction, recycle, purge, and energy balance.",
+                updated: "Jan 2026"
+            },
+            {
+                id: 5,
+                title: "Chemical Reaction Engineering (CRE-1) PYQs",
+                subject: "PYQs",
+                semester: "5",
+                type: "Question Bank",
+                format: "PDF",
+                size: "5.0 MB",
+                driveUrl: "https://drive.google.com",
+                description: "5 years solved university question papers for ideal reactor design.",
+                updated: "Feb 2026"
+            },
+            {
+                id: 6,
+                title: "Heat Transfer Lab Practical Manual",
+                subject: "Lab Reports",
+                semester: "4",
+                type: "Lab Report",
+                format: "PDF",
+                size: "3.4 MB",
+                driveUrl: "https://drive.google.com",
+                description: "Double pipe heat exchanger, shell & tube exchanger experiment records.",
+                updated: "Feb 2026"
+            },
+            {
+                id: 7,
+                title: "Heat Transfer Operations Notes",
+                subject: "Heat Transfer",
+                semester: "4",
+                type: "Complete Notes",
+                format: "PDF",
+                size: "7.9 MB",
+                driveUrl: "https://drive.google.com",
+                description: "Conduction, convection, radiation equations & LMTD design calculations.",
+                updated: "Jan 2026"
+            },
+            {
+                id: 8,
+                title: "Process Dynamics & Control (PDC)",
+                subject: "Instrumentation",
+                semester: "6",
+                type: "Lecture Notes",
+                format: "PDF",
+                size: "5.5 MB",
+                driveUrl: "https://drive.google.com",
+                description: "Transfer functions, Laplace transforms, PID controller tuning, stability analysis.",
+                updated: "Mar 2026"
+            }
+        ];
+
+        // -------------------------------------------------------------
+        // APP STATE & CONSTANTS
+        // -------------------------------------------------------------
+        const semesters = ["All", "1", "2", "3", "4", "5", "6", "7", "8"];
+        const subjects = ["All", "Thermodynamics", "Fluid Mechanics", "Mass Transfer", "Process Calculations", "Heat Transfer", "Instrumentation", "PYQs", "Lab Reports"];
+
+        let selectedSem = "All";
+        let selectedSubject = "All";
+        let searchQuery = "";
+
+        // -------------------------------------------------------------
+        // INITIALIZATION
+        // -------------------------------------------------------------
+        window.onload = function() {
+            document.getElementById("year").innerText = new Date().getFullYear();
+            initTheme();
+            renderSemFilters();
+            renderSubjectFilters();
+            filterNotes();
+        };
+
+        // Theme Toggle
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').className = "fa-solid fa-sun text-sm text-amber-400";
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').className = "fa-solid fa-moon text-sm";
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                document.getElementById('themeIcon').className = "fa-solid fa-moon text-sm";
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                document.getElementById('themeIcon').className = "fa-solid fa-sun text-sm text-amber-400";
+            }
+        }
+
+        // Render Semester Buttons
+        function renderSemFilters() {
+            const container = document.getElementById("semFilterContainer");
+            container.innerHTML = semesters.map(sem => `
+                <button 
+                    onclick="selectSem('${sem}')"
+                    class="px-3 py-1 rounded-full font-medium transition-all duration-150 whitespace-nowrap ${
+                        selectedSem === sem 
+                        ? 'bg-brand-600 text-white shadow-sm' 
+                        : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
+                    }">
+                    ${sem === 'All' ? 'All Semesters' : 'Sem ' + sem}
+                </button>
+            `).join('');
+        }
+
+        // Render Subject Category Buttons
+        function renderSubjectFilters() {
+            const container = document.getElementById("subjectFilterContainer");
+            container.innerHTML = subjects.map(sub => `
+                <button 
+                    onclick="selectSubject('${sub}')"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-wide transition-all whitespace-nowrap ${
+                        selectedSubject === sub 
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm' 
+                        : 'bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400'
+                    }">
+                    ${sub}
+                </button>
+            `).join('');
+        }
+
+        // Filter Updates
+        function selectSem(sem) {
+            selectedSem = sem;
+            renderSemFilters();
+            filterNotes();
+        }
+
+        function selectSubject(sub) {
+            selectedSubject = sub;
+            renderSubjectFilters();
+            filterNotes();
+        }
+
+        function clearSearchInput() {
+            const input = document.getElementById("searchInput");
+            input.value = "";
+            document.getElementById("clearSearch").classList.add("hidden");
+            filterNotes();
+        }
+
+        function resetFilters() {
+            selectedSem = "All";
+            selectedSubject = "All";
+            document.getElementById("searchInput").value = "";
+            document.getElementById("clearSearch").classList.add("hidden");
+            renderSemFilters();
+            renderSubjectFilters();
+            filterNotes();
+        }
+
+        // Core Filter Logic
+        function filterNotes() {
+            const input = document.getElementById("searchInput");
+            searchQuery = input.value.toLowerCase().trim();
+
+            // Toggle clear button
+            if (searchQuery.length > 0) {
+                document.getElementById("clearSearch").classList.remove("hidden");
+            } else {
+                document.getElementById("clearSearch").classList.add("hidden");
+            }
+
+            const filtered = notesData.filter(item => {
+                const matchesSem = selectedSem === "All" || item.semester === selectedSem;
+                const matchesSubject = selectedSubject === "All" || item.subject === selectedSubject;
+                const matchesSearch = 
+                    item.title.toLowerCase().includes(searchQuery) ||
+                    item.subject.toLowerCase().includes(searchQuery) ||
+                    item.type.toLowerCase().includes(searchQuery) ||
+                    item.description.toLowerCase().includes(searchQuery);
+
+                return matchesSem && matchesSubject && matchesSearch;
+            });
+
+            document.getElementById("notesCount").innerText = filtered.length;
+            renderGrid(filtered);
+        }
+
+        // Render Cards Grid
+        function renderGrid(data) {
+            const grid = document.getElementById("notesGrid");
+            const emptyState = document.getElementById("emptyState");
+
+            if (data.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                emptyState.classList.add("flex");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+            emptyState.classList.remove("flex");
+
+            grid.innerHTML = data.map(item => `
+                <div class="group flex flex-col justify-between bg-white dark:bg-slate-800/90 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+                    <div class="space-y-3">
+                        <!-- Top Badges -->
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200/50 dark:border-brand-800/50">
+                                Sem ${item.semester}
+                            </span>
+                            <span class="text-xs font-medium text-slate-400 dark:text-slate-500">
+                                <i class="fa-solid fa-file-pdf text-red-500 mr-1"></i> ${item.size}
+                            </span>
+                        </div>
+
+                        <!-- Card Title & Details -->
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
+                                ${item.title}
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                                ${item.description}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer Details & Buttons -->
+                    <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+                        <span class="inline-block px-2 py-1 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            ${item.type}
+                        </span>
+
+                        <!-- Download / View Button -->
+                        <a 
+                            href="${item.driveUrl}" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-500 text-white text-xs font-medium transition-colors shadow-sm"
+                        >
+                            <span>Open PDF</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
